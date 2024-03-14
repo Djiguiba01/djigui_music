@@ -1,144 +1,131 @@
-import 'package:djiguiba_music/component/entete_page.dart';
-import 'package:djiguiba_music/component/my_drawer.dart';
-import 'package:djiguiba_music/sous_pages/detailmusic.dart';
-import 'package:djiguiba_music/sous_pages/music_page_detail.dart';
+import 'package:djiguiba_music/consts/colors.dart';
+import 'package:djiguiba_music/controllers/player_controller.dart';
+import 'package:djiguiba_music/sous_pages/musis_page_detail.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:on_audio_query/on_audio_query.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
-import 'package:djiguiba_music/music_config/providers/audio_player_provider.dart';
-import 'package:djiguiba_music/music_config/widgets/miniplayer.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import '../consts/text_style.dart';
 
-class MusicPage extends StatefulWidget {
-  const MusicPage({Key? key});
-
-  @override
-  State<MusicPage> createState() => _MusicPageState();
-}
-
-class _MusicPageState extends State<MusicPage> {
-  final OnAudioQuery audioQuery = OnAudioQuery();
-  late List<SongModel> _songs;
-
-  @override
-  void initState() {
-    super.initState();
-    _songs = [];
-    requestPermission();
-  }
-
-  Future<void> requestPermission() async {
-    final deviceInfo = await DeviceInfoPlugin().androidInfo;
-    if (Theme.of(context).platform == TargetPlatform.android) {
-      if (await Permission.audio.isGranted ||
-          await Permission.storage.isGranted) {
-        _fetchSongs();
-      } else {
-        if (deviceInfo.version.sdkInt > 32) {
-          await Permission.audio.request();
-        } else {
-          await Permission.storage.request();
-        }
-      }
-    } else if (Theme.of(context).platform == TargetPlatform.iOS) {
-      if (await Permission.mediaLibrary.isGranted) {
-        _fetchSongs();
-      } else {
-        await Permission.mediaLibrary.request();
-      }
-    }
-  }
-
-  Future<void> _fetchSongs() async {
-    List<SongModel> songs = await audioQuery.querySongs();
-    setState(() {
-      _songs = songs;
-    });
-  }
+class MusicPage extends StatelessWidget {
+  const MusicPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final audioProvider = Provider.of<AudioPlayerProvider>(context);
+    //set controller to getX
+    var playerController = Get.put(PlayerController());
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.background,
-        drawer: MyDrawer(),
-        appBar: AppBar(
-          title: Text('Music Page'),
-          bottom: TabBar(
-            tabs: [
-              Tab(text: 'Toutes les chansons'),
-              Tab(text: 'Dossier'),
-            ],
+    return Scaffold(
+      backgroundColor: bgDarkColor,
+      appBar: AppBar(
+        backgroundColor: bgDarkColor,
+        actions: [
+          IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.search,
+                color: whiteColor,
+              ))
+        ],
+        leading: const Icon(
+          Icons.sort_rounded,
+          color: whiteColor,
+        ),
+        title: Text(
+          'Dji_Music',
+          style: monTextStyle(
+            family: bold,
+            size: 18,
           ),
         ),
-        body: TabBarView(
-          children: [
-            ListView.builder(
-              itemCount: _songs.length,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    ListTile(
-                      tileColor: audioProvider.isPlaying
-                          ? audioProvider.currentPlayingIndex == index
-                              ? Colors.white12
-                              : null
-                          : null,
-                      onTap: () {
-                        audioProvider.playPause(index, _songs);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MusicPlayerDetail(
-                              song: _songs[
-                                  index], // Passer la chanson sélectionnée à la page MusicPlayerDetail
+      ),
+      body: FutureBuilder<List<SongModel>>(
+        future: playerController.audioQuery.querySongs(
+            ignoreCase: true,
+            orderType: OrderType.ASC_OR_SMALLER,
+            sortType: null,
+            uriType: UriType.EXTERNAL),
+        builder:
+            (BuildContext context, AsyncSnapshot<List<SongModel>> snapshot) {
+          if (snapshot.data == null) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.data!.isEmpty) {
+            return Center(
+                child: Text(
+              'Pas de music',
+              style: monTextStyle(),
+            ));
+          } else {
+            print(snapshot.data);
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: snapshot.data?.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        child: Obx(
+                          () => ListTile(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            tileColor: bgColor,
+                            title: Text(
+                              snapshot.data![index].displayNameWOExt,
+                              overflow: TextOverflow.clip,
+                              maxLines: 1,
+                              style: monTextStyle(
+                                family: bold,
+                                size: 15,
+                              ),
                             ),
+                            subtitle: 
+                            Text(
+                              '${snapshot.data![index].artist}',
+                              style: monTextStyle(
+                                family: regular,
+                                size: 12,
+                              ),
+                            ),
+                            leading: QueryArtworkWidget(
+                              id: snapshot.data![index].id,
+                              type: ArtworkType.AUDIO,
+                              nullArtworkWidget: const Icon(
+                                Icons.music_note,
+                                color: whiteColor,
+                                size: 32,
+                              ),
+                            ),
+                            trailing:
+                                playerController.playIndex.value == index &&
+                                        playerController.isPlaying.value
+                                    ? const Icon(
+                                        Icons.pause,
+                                        color: whiteColor,
+                                        size: 26,
+                                      )
+                                    : null,
+                            onTap: () {
+                              if (kDebugMode) {
+                                print(
+                                    'index from player ${snapshot.data![playerController.playIndex.value].id}');
+                              }
+                              Get.to(() =>
+                                  MusicPageDetail(songList: snapshot.data!));
+                              if (playerController.isPlaying.isFalse ||
+                                  playerController.playIndex.value != index) {
+                                playerController.playSong(
+                                    snapshot.data![index].uri, index);
+                              }
+                            },
                           ),
-                        );
-                      },
-                      leading: QueryArtworkWidget(
-                        id: _songs[index].id,
-                        type: ArtworkType.AUDIO,
-                        artworkWidth: 55,
-                        artworkHeight: 55,
-                        artworkBorder: BorderRadius.circular(8),
-                      ),
-                      title: Text(
-                        _songs[index].title ?? '',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        _songs[index].artist ?? '',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.white38),
-                      ),
-                      trailing: audioProvider.isPlaying
-                          ? audioProvider.currentPlayingIndex == index
-                              ? Icon(Icons.graphic_eq)
-                              : null
-                          : null,
-                    ),
-                    Divider(
-                      color: Colors.white.withOpacity(0.07),
-                      indent: 50,
-                    ),
-                  ],
-                );
-              },
-            ),
-            Center(
-              child: Text('Favorites List &'),
-            ),
-          ],
-        ),
-        bottomNavigationBar: MiniPlayer(songs: _songs),
+                        ));
+                  }),
+            );
+          }
+        },
       ),
     );
   }

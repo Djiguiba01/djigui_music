@@ -1,7 +1,7 @@
-import 'package:djiguiba_music/music_config/providers/audio_player_provider.dart';
-import 'package:djiguiba_music/component/bottom_pied_page.dart';
+import 'package:djiguiba_music/consts/colors.dart';
+import 'package:djiguiba_music/pages/bottom_pied_page.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,11 +14,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'My Music',
+      title: 'Dji Music',
       theme: ThemeData.dark(),
-      home: ChangeNotifierProvider(
-        create: (context) => AudioPlayerProvider(),
-        child: BottomPiedPage(),
+      home: GetMaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: ThemeData(
+            //fontFamily: 'reqular',
+            appBarTheme: const AppBarTheme(
+          backgroundColor: bgDarkColor,
+          //elevation: 0
+        )),
+        home: BottomPiedPage(),
       ),
     );
   }

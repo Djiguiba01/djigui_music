@@ -3,8 +3,12 @@
 <!-- :::::::::::::: -->
 <!-- Ajoutez la permission suivante pour accéder à la mémoire externe -->
  <!-- Android 12 or below  -->
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+ <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+
+  <uses-permission android:name="android.permission.INTERNET"/>
 
   <!-- Android 13 or greater  -->
   <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>

@@ -1,6 +1,5 @@
-import 'package:djiguiba_music/component/entete_page.dart';
+import 'package:djiguiba_music/consts/colors.dart';
 import 'package:flutter/material.dart';
-import '../component/my_drawer.dart';
 
 class ProfilPage extends StatelessWidget {
   const ProfilPage({super.key});
@@ -8,12 +7,13 @@ class ProfilPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: EnteteAppBar(), 
-      ),
-      drawer: MyDrawer(),
+      backgroundColor: bgDarkColor,
+      // backgroundColor: Theme.of(context).colorScheme.background,
+      // appBar: PreferredSize(
+      //   preferredSize: const Size.fromHeight(kToolbarHeight),
+      //   child: EnteteAppBar(), 
+      // ),
+      // drawer: MyDrawer(),
       body: Center(
         child: Text(
           "Profil",

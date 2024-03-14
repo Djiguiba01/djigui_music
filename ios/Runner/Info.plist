@@ -50,5 +50,13 @@
 <string>Expliquer pourquoi vous avez besoin d'accéder à la musique.</string> -->
 <key>NSAppleMusicUsageDescription</key>
 	<string>$(PROJECT_NAME) requires access to media library</string>
+	<!-- :::::Video:::::: -->
+	<key>NSAppTransportSecurity</key>
+<dict>
+  <key>NSAllowsArbitraryLoads</key>
+  <true/>
+</dict>
+
+	
 </dict>
 </plist>

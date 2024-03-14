@@ -1,5 +1,5 @@
+import 'package:djiguiba_music/pages/bottom_pied_page.dart';
 import 'package:flutter/material.dart';
-import 'package:djiguiba_music/component/bottom_pied_page.dart';
 
 class WelcomePage extends StatefulWidget {
   @override
